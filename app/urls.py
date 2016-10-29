@@ -17,9 +17,10 @@ from django.conf.urls import include, url
 from django.contrib import admin
 from rest_framework_jwt.views import obtain_jwt_token
 
-from tasks.views import Tarefa
+from tasks.views import Tarefa, TarefaEncerrada
 
 urlpatterns = [
 	url(r'^auth/', obtain_jwt_token),
 	url(r'^tarefas/', Tarefa.as_view(), name='tarefas'),
+	url(r'^encerrada/', TarefaEncerrada.as_view(), name='encerrada'),
 ]

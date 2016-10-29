@@ -1,5 +1,7 @@
 from datetime import datetime, timedelta
 
+from tasks.models import Tarefa
+
 from django.contrib.auth.models import User
 from django.test import TestCase
 
@@ -25,7 +27,6 @@ class BaseTestCase(TestCase):
         response = client.post('/auth/', self.data, format='json')
         self.assertEqual(response.status_code, 200)
         return response.data.get('token')
-
 
 class LoginTestCase(BaseTestCase):
     def setUp(self):
@@ -72,3 +73,23 @@ class TarefaTestCase(BaseTestCase):
             format='json'
         )
         self.assertEqual(response.status_code, 400)
+
+class TarefaConcluirTestCase(BaseTestCase):
+
+    def test_tarefa_concluir(self):
+        tarefa = Tarefa.objects.create(
+            nome='Nome tarefa',
+            descricao='Tarefa',
+            inicio=datetime.now(),
+            termino=datetime.now() + timedelta(days=2),
+            usuario=self.user
+        )
+        client = APIClient(enforce_csrf_checks=True)
+        client.credentials(HTTP_AUTHORIZATION='jwt ' + self.get_token())
+        response = client.post(
+            '/encerrada/',
+            {'tarefa': tarefa.pk},
+            format='json'
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data.get('encerrada'), True)
