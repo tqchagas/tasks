@@ -28,6 +28,17 @@ class BaseTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         return response.data.get('token')
 
+
+    def criar_tarefa(self):
+        return Tarefa.objects.create(
+            nome='Nome tarefa',
+            descricao='Tarefa',
+            inicio=datetime.now(),
+            termino=datetime.now() + timedelta(days=2),
+            usuario=self.user
+        )
+
+
 class LoginTestCase(BaseTestCase):
     def setUp(self):
         return super(LoginTestCase, self).setUp()
@@ -74,16 +85,11 @@ class TarefaTestCase(BaseTestCase):
         )
         self.assertEqual(response.status_code, 400)
 
-class TarefaConcluirTestCase(BaseTestCase):
 
-    def test_tarefa_concluir(self):
-        tarefa = Tarefa.objects.create(
-            nome='Nome tarefa',
-            descricao='Tarefa',
-            inicio=datetime.now(),
-            termino=datetime.now() + timedelta(days=2),
-            usuario=self.user
-        )
+class TarefaEncerradaTestCase(BaseTestCase):
+
+    def test_tarefa_encerrada(self):
+        tarefa = self.criar_tarefa()
         client = APIClient(enforce_csrf_checks=True)
         client.credentials(HTTP_AUTHORIZATION='jwt ' + self.get_token())
         response = client.post(
@@ -93,3 +99,20 @@ class TarefaConcluirTestCase(BaseTestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data.get('encerrada'), True)
+
+    def test_tarefa_reaberta(self):
+        tarefa = self.criar_tarefa()
+        tarefa.encerrada = True
+        tarefa.save()
+        client = APIClient(enforce_csrf_checks=True)
+        client.credentials(HTTP_AUTHORIZATION='jwt ' + self.get_token())
+        response = client.post(
+            '/encerrada/',
+            {'tarefa': tarefa.pk},
+            format='json'
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data.get('encerrada'), False)
+
+
+

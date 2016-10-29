@@ -28,6 +28,7 @@ class Tarefa(APIView):
         else:
             return Response(tarefa.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class TarefaEncerrada(APIView):
 
     def post(self, request):
