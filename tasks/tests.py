@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from datetime import datetime, timedelta
 
 from tasks.models import Tarefa
@@ -85,8 +86,23 @@ class TarefaTestCase(BaseTestCase):
         )
         self.assertEqual(response.status_code, 400)
 
-
-class TarefaEncerradaTestCase(BaseTestCase):
+    def test_tarefa_data_invalida(self):
+        tarefa = {
+            'nome': 'Nome tarefa',
+            'descricao': 'Tarefa',
+            'inicio': datetime.now() + timedelta(days=2),
+            'termino': datetime.now(),
+        }
+        client = APIClient(enforce_csrf_checks=True)
+        client.credentials(HTTP_AUTHORIZATION='jwt ' + self.get_token())
+        response = client.post(
+            '/tarefas/', 
+            tarefa, 
+            format='json'
+        )
+        self.assertEqual(response.status_code, 400)
+        msg = u'Data de início deve ser menor ou igual a data de término.'
+        self.assertEqual(response.data.get('erro')[0], msg)
 
     def test_tarefa_encerrada(self):
         tarefa = self.criar_tarefa()
@@ -113,6 +129,3 @@ class TarefaEncerradaTestCase(BaseTestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data.get('encerrada'), False)
-
-
-
