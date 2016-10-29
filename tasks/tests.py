@@ -36,3 +36,39 @@ class LoginTestCase(BaseTestCase):
         response = client.post('/auth/', self.data, format='json')
         token = self.get_token()
         self.assertEqual(response.status_code, 200)
+
+
+class TarefaTestCase(BaseTestCase):
+    def setUp(self):
+        return super(TarefaTestCase, self).setUp()
+
+    def test_tarefa_ok(self):
+        tarefa = {
+            'nome': 'Nome tarefa',
+            'descricao': 'Tarefa',
+            'inicio': datetime.now(),
+            'termino': datetime.now() + timedelta(days=2),
+        }
+        client = APIClient(enforce_csrf_checks=True)
+        client.credentials(HTTP_AUTHORIZATION='jwt ' + self.get_token())
+        response = client.post(
+            '/tarefas/', 
+            tarefa, 
+            format='json'
+        )
+        self.assertEqual(response.status_code, 200)
+
+    def test_tarefa_fail(self):
+        tarefa = {
+            'descricao': 'Tarefa',
+            'inicio': datetime.now(),
+            'termino': datetime.now() + timedelta(days=2),
+        }
+        client = APIClient(enforce_csrf_checks=True)
+        client.credentials(HTTP_AUTHORIZATION='jwt ' + self.get_token())
+        response = client.post(
+            '/tarefas/', 
+            tarefa, 
+            format='json'
+        )
+        self.assertEqual(response.status_code, 400)
