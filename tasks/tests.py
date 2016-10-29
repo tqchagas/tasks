@@ -104,7 +104,7 @@ class TarefaTestCase(BaseTestCase):
         msg = u'Data de início deve ser menor ou igual a data de término.'
         self.assertEqual(response.data.get('erro')[0], msg)
 
-    def test_tarefa_encerrada(self):
+    def test_tarefa_encerrar(self):
         tarefa = self.criar_tarefa()
         client = APIClient(enforce_csrf_checks=True)
         client.credentials(HTTP_AUTHORIZATION='jwt ' + self.get_token())
@@ -116,7 +116,7 @@ class TarefaTestCase(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data.get('encerrada'), True)
 
-    def test_tarefa_reaberta(self):
+    def test_tarefa_reabrir(self):
         tarefa = self.criar_tarefa()
         tarefa.encerrada = True
         tarefa.save()
